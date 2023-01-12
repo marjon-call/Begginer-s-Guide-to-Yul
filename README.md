@@ -46,7 +46,7 @@ uint128 var5 = 2;
 I think you're ready to learn some Yul!
 
 |   Instruction   |  Explanation   |
-|  :---:   | :---: |
+|  :---:   | :--- |
 |   let   |   This is required before defining a variable. Since all values are bytes, there is no need to assign a value type.   |
 |   :=    |  Assigns a variable a value. Same as ‘=’ in Solidity.  |
 | sload(p) |  Loads the variable in slot p from storage.  |
@@ -100,6 +100,7 @@ function readAndWriteToStorage() external returns (uint256, uint256, uint256) {
 
 <br>
 
+To be continued...
 
 
 
