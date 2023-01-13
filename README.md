@@ -310,7 +310,64 @@ function getMappedValue(uint256 key1, uint256 key2) external view returns(uint25
 Recall that we are reading from right to left when packing varibales. Nested mappings are no differnt. We first get the hash of the first key (0). Then we take the hash of that with the second key (1). Finally, we load the slot from storage to get our value.
 Congradulations, you completed the section on storage with Yul.
 
+<br>
 
+## Reading & Writing Packed Variables
+
+Suppose you want to change ```var5``` to 4. We know that var5 is located in slot 3, so you might try something like this:
+
+```
+function writeVar5(uint256 newVal) external {
+ 
+    assembly {
+        sstore(3, newVal)
+    }
+ 
+}
+
+
+``` 
+
+Using ```getValInHex(3)``` we see that slot 3 has been rewritten to ```0x0000000000000000000000000000000000000000000000000000000000000004```. That’s a problem because now ```var4``` has been rewritten to 0. In this section we are going to go over how to read and write packed variables, but first we need to learn a little more about Yul syntax.
+
+
+<br>
+
+|   Instruction   |  Explanation   |
+|  :---   | :--- |
+| and(x, y)  |  bitwise “and” of x and y |
+| or(x, y) |  bitwise “or” of x and y |
+| xor(x,  y) |  bitwise “xor” of x and y  |
+| shl(x, y)  |  a logical shift left of y by x bits |
+| shr(x, y)  |  a logical shift right of y by x bits|
+
+<br>
+
+If you're unfamiliar with these operations don’t worry, we are about to go over them with examples.
+
+Let's start with ```and()```. We are going to take two bytes32 and try the and opperator and see what it returns.
+<br>
+
+```
+function getAnd() external view returns (bytes32) {
+
+    bytes32 randVar = 0x0000000000000000000000009acc1d6aa9b846083e8a497a661853aae07f0f00;
+    bytes32 mask = 0x1111111111111111111111110000000000000000000000000000000000000000;
+
+    bytes32 ans;
+
+    assembly {
+
+        ans := and(mask, randVar)
+
+    }
+
+    return ans;
+
+}
+```
+
+To be conintued.
 
 
 
