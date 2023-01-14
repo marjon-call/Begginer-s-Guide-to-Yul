@@ -260,7 +260,7 @@ You may be asking what prevents us from having a collision with another variable
 
 
 <br>
-Mappings behave similarly to dynamic arrays except that we hash the slot along with the key value.
+Mappings behave similarly to dynamic arrays except that we hash the slot along with the key.
 
 ```
 // slot 7
