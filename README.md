@@ -13,7 +13,7 @@ In the remainder of this article we will discuss the basics of using Yul through
 
 
 ## Variable Assignments, Operations, & Evaluations
-The first topic we need to cover is simple operations. Yul has +, -, *, /, %, **, <, >, & =. Notice that >= and <= are not included, Yul does not have those operations. Additonally, instead of evaluations equaling ture or false, they equal 1 or 0 respectivley. With that said, let's get started with learning some Yul!
+The first topic we need to cover is simple operations. Yul has +, -, *, /, %, **, <, >, and =. Notice that >= and <= are not included, Yul does not have those operations. Additonally, instead of evaluations equaling ture or false, they equal 1 or 0 respectivley. With that said, let's get started with learning some Yul!
 
 <br>
 
@@ -57,7 +57,7 @@ function addOneAnTwo() external pure returns(uint256) {
 
 
 ## Storage
-Before we can dive deeper into how Yul works, we need a good understanding of how storage works in smart contracts. Storage is composed of a series of slots. There are 2^256 slots for a smart contract. When declaring variables, we start with slot0 and increment from there. Each slot is 256 bits long (32 bytes), that’s where uint256 and bytes32 get their names from. All variables are converted to hexadecimal. If a variable, such as a uint128, is used we do not take an entire slot to store that variable. Instead it is padded with 0’s on the left side. Let’s look at an example to get a better understanding. <br>
+Before we can dive deeper into how Yul works, we need a good understanding of how storage works in smart contracts. Storage is composed of a series of slots. There are 2^256 slots for a smart contract. When declaring variables, we start with slot 0 and increment from there. Each slot is 256 bits long (32 bytes), that’s where ```uint256``` and ```bytes32``` get their names from. All variables are converted to hexadecimal. If a variable, such as a ```uint128```, is used we do not take an entire slot to store that variable. Instead it is padded with 0’s on the left side. Let’s look at an example to get a better understanding. <br>
 
 ```
 // slot 0
@@ -75,18 +75,18 @@ uint128 var5 = 2;
 ```
 <br>
 
-```var1``` : Since uint256 variables are equal to 32 bytes, var 1 takes up the entirety of slot 0. Here is what is being stored in slot 0: ```0x0000000000000000000000000000000000000000000000000000000000000100```. 
+```var1``` : Since ```uint256``` variables are equal to 32 bytes, ```var1``` takes up the entirety of slot 0. Here is what is being stored in slot 0: ```0x0000000000000000000000000000000000000000000000000000000000000100```. 
 <br>
 
 ```var2```: Addresses are slightly more complex. Since they only take up 20 bytes of storage, addresses get padded with 0s on the left side. Here is what is being stored in slot 1: ```0x0000000000000000000000009acc1d6aa9b846083e8a497a661853aae07f0f00```. 
 
 <br>
 
-```var3```: This one may seem simple, slot 2 is consumed by the entirety of the bytes32 variable. 
+```var3```: This one may seem simple, slot 2 is consumed by the entirety of the ```bytes32``` variable. 
 
 <br>
 
-```var4 & var5```: Remember when I mentioned that uint128’s get padded with 0’s? Well if we order our variables so that the sum of their storage is under 32 bytes, we can fit them into a slot together! This is called packing variables, and it can save you on gas. Let's look at what’s stored in slot 3: ```0x0000000000000000000000000000000200000000000000000000000000000001```. Notice that ```0x000000000000000000000000000002``` and ```0x000000000000000000000000000001``` fit perfectly together in the same slot. That is because they both take up 16 bytes (half of a slot). 
+```var4 & var5```: Remember when I mentioned that ```uint128```’s get padded with 0’s? Well if we order our variables so that the sum of their storage is under 32 bytes, we can fit them into a slot together! This is called packing variables, and it can save you on gas. Let's look at what’s stored in slot 3: ```0x0000000000000000000000000000000200000000000000000000000000000001```. Notice that ```0x000000000000000000000000000002``` and ```0x000000000000000000000000000001``` fit perfectly together in the same slot. That is because they both take up 16 bytes (half of a slot). 
 
 <br>
 
@@ -141,7 +141,7 @@ function readAndWriteToStorage() external returns (uint256, uint256, uint256) {
 <br>
 
 ```x``` = 3. This makes sense since we know that var5 is packed into slot 3. <br>
-```y``` = 16. This should also make sense since we know that var4 takes up half of slot 3. Since variables are packed from right to left we get byte 16 as the start index of var5. <br>
+```y``` = 16. This should also make sense since we know that ```var4``` takes up half of slot 3. Since variables are packed from right to left we get byte 16 as the start index of ```var5```. <br>
 ```z``` = 1. The ```sstore()``` is assigning slot 0 the value 1. Then, we assign z the value of slot 0 with the ```sload()```.
 
 <br>
@@ -308,13 +308,14 @@ function getMappedValue(uint256 key1, uint256 key2) external view returns(uint25
 
 
 Recall that we are reading from right to left when packing varibales. Nested mappings are no differnt. We first get the hash of the first key (0). Then we take the hash of that with the second key (1). Finally, we load the slot from storage to get our value.
-Congradulations, you completed the section on storage with Yul.
+<br>
+Congradulations, you completed the section on storage with Yul!
 
 <br>
 
 ## Reading & Writing Packed Variables
 
-Suppose you want to change ```var5``` to 4. We know that var5 is located in slot 3, so you might try something like this:
+Suppose you want to change ```var5``` to 4. We know that ```var5``` is located in slot 3, so you might try something like this:
 
 ```
 function writeVar5(uint256 newVal) external {
@@ -345,14 +346,14 @@ Using ```getValInHex(3)``` we see that slot 3 has been rewritten to ```0x0000000
 
 If you're unfamiliar with these operations don’t worry, we are about to go over them with examples.
 
-Let's start with ```and()```. We are going to take two bytes32 and try the and opperator and see what it returns.
+Let's start with ```and()```. We are going to take two ```bytes32``` and try the ```and()``` opperator and see what it returns.
 <br>
 
 ```
-function getAnd() external view returns (bytes32) {
+function getAnd() external pure returns (bytes32) {
 
     bytes32 randVar = 0x0000000000000000000000009acc1d6aa9b846083e8a497a661853aae07f0f00;
-    bytes32 mask = 0x1111111111111111111111110000000000000000000000000000000000000000;
+    bytes32 mask = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
     bytes32 ans;
 
@@ -367,10 +368,159 @@ function getAnd() external view returns (bytes32) {
 }
 ```
 
-To be conintued.
+If you look at the output we see ```0x0000000000000000000000009acc1d6aa9b846083e8a497a661853aae07f0f00```. The reason for this is because what the ```and()``` does is it looks at each bit from both inputs and compares their values. If both bits are a 1 (not literally a 1, think of it in terms of binary: active or inactive), then we keep the bit as it is. Otherwise it gets set to 0. <br>
+
+Now look at the code for ```or()```.
+
+```
+function getOr() external pure returns (bytes32) {
+ 
+    bytes32 randVar = 0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffff;
+    bytes32 mask = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+ 
+    bytes32 ans;
+ 
+    assembly {
+ 
+        ans := or(mask, randVar)
+ 
+    }
+ 
+    return ans;
+ 
+}
+```
+This time the output is ```0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff```. This is because it looks to see if either bit is active. Let’s look at what happens if we change the mask variable to ```0x00ffffffffffffffffffffff0000000000000000000000000000000000000000
+```. As you can see the output changes to ```0x00ffffffffffffffffffffff9acc1d6aa9b846083e8a497a661853aae07f0f00```. Notice the first byte is ```0x00```, because neither input has an active bit for the first byte. 
+<br>
+
+```xor()``` is a little bit different. It requires one bit to be active (1) and the other bit to be inactive (0). Here is a code demonstration.
+```
+function getXor() external pure returns (bytes32) {
+ 
+    bytes32 randVar = 0x00000000000000000000000000000000000000000000000000000000000000ff;
+    bytes32 mask =    0xffffffffffffffffffffffff00000000000000000000000000000000000000ff;
+ 
+    bytes32 ans;
+ 
+    assembly {
+ 
+        ans := xor(mask, randVar)
+ 
+    }
+ 
+    return ans;
+ 
+}
+
+```
+ The output is ```0xffffffffffffffffffffffff0000000000000000000000000000000000000000```. The key difference is apparent when we see the only active bits in the output are when ```0x00``` and ```0xff``` are aligned.
 
 
+<br>
 
+```shl()``` and ```shr()``` operate very similarly to each other. Both shift the input value by an input amount of bits. ```shl()``` shifts to the left and ```shr()``` shifts to the right. Let’s take a look at some code!
+
+```
+function shlAndShr() external pure returns(bytes32, bytes32) {
+   
+    bytes32 randVar = 0xffff00000000000000000000000000000000000000000000000000000000ffff;
+ 
+    bytes32 ans1;
+    bytes32 ans2;
+ 
+    assembly {
+ 
+        ans1 := shr(16, randVar)
+        ans2 := shl(16, randVar)
+ 
+    }
+ 
+    return (ans1, ans2);
+ 
+}
+```
+Output: <br>
+```ans1```: ```0x0000ffff00000000000000000000000000000000000000000000000000000000``` <br>
+```ans2```:  ```0x00000000000000000000000000000000000000000000000000000000ffff0000``` <br>
+
+Let’s start by looking at ```ans1```. We perform ```shr()``` by 16 bits (2 bytes). As you can see the last two bytes change from ```0xffff``` to ```0x0000```, and the first two bytes are shifted two bytes to the right. Knowing this, ```ans2``` seems self explanatory; all that happens is the bits are shifted to the left. 
+
+<br>
+
+Before we write to ```var5```, let's write a function that reads ```var4``` and ```var5``` first.
+
+```
+function readVar4AndVar5() external view returns (uint128, uint128) {
+ 
+        uint128 readVar4;
+        uint128 readVar5;
+ 
+        bytes32 mask = 0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff;
+ 
+        assembly {
+ 
+            let slot3 := sload(3)
+ 
+            // the and() operation sets var5 to 0x00
+            readVar4 := and(slot3, mask)
+ 
+ 
+            // we shift var5 to var4's position
+            // var5's old position becomes 0x00
+            readVar5 := shr( mul( var5.offset, 8 ), slot3 )
+ 
+        }
+ 
+        return (readVar4, readVar5);
+ 
+    }
+```
+
+The output is 1 & 2 as expected. For retrieving ```var4``` we just need to use a mask to set the value to ```0x0000000000000000000000000000000000000000000000000000000000000001
+```. Then we return a ```uint128``` set equal to 1. When reading ```var5```, we need to shift ```var4``` off by shifting right. This leaves us with ```0x0000000000000000000000000000000000000000000000000000000000000002```, which we can return. It is important to note that sometimes you will have to shift and mask in unison to read a value that has more than 2 varibales packed into a storage slot.
+
+<br>
+
+
+Ok, we’re finally ready to change the value of ```var5``` to 4!
+
+
+```
+function writeVar5(uint256 newVal) external {
+ 
+    assembly {
+ 
+        // load slot 3
+        let slot3 := sload(3)
+ 
+        // mask for clearing var5
+        let mask := 0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff
+ 
+        // isolate var4
+        let clearedVar5 := and(slot3, mask)
+ 
+        // format new value into var5 position
+        let shiftedVal := shl( mul( var5.offset, 8 ), newVal )
+ 
+        // combine new value with isolated var4
+        let newSlot3 := or(shiftedVal, clearedVar5)
+ 
+        // store new value to slot 3
+        sstore(3, newSlot3)
+    }
+ 
+}
+```
+
+The first step is to load storage slot 3. Next, we need to create a mask. Similarly to when we read ```var4```, we want to isolate the value to ```0x0000000000000000000000000000000000000000000000000000000000000001
+```. The next step is formatting our new value to be in ```var5```’s slot position so it looks like this ```0x0000000000000000000000000000000400000000000000000000000000000000```. Unlike when we read ```var5```, we are going to shift our value to the left this time. Finally, we are going to use ```or()``` to combine our values into 32 bytes of hexadecimal, and store that value to slot 3. We can check our work by calling ```getValInHex(3)```. This is going to return ```0x0000000000000000000000000000000400000000000000000000000000000001```, which is what we are expecting to see.
+
+<br>
+
+Great, you now know how to read and write to packed storage slots!
+
+<br>
 
 
 
