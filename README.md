@@ -562,7 +562,93 @@ Great, you now know how to read and write to packed storage slots!
 
 
 
+## Memory
 
+Alright, we are finally ready to learn about memory!
+
+<br>
+
+Memory behaves differently than storage. Memory is not persistent. Meaning that once the function is done executing all of the variables are cleared. Memory is comparable to heap in other languages, but there is no garbage collector. Memory is a lot cheaper than storage. The first 22 words of memory costs are calculated linearly, but be careful because after that memory costs become quadratic. Memory is laid out in 32 byte sequences. We will get a better understanding of this later, but for now understand ```0x00``` - ```0x20``` is one sequence (you can think of it like a slot if that helps, but they are different). Solidity allocates ```0x00``` - ```0x40``` as ```scratch space```. This area of memory is not guaranteed to be empty, and is used for certain operations. ```0x40``` - ```0x60``` is known as the ```free memory pointer```, and is used to write something new to memory. ```0x60``` - ```0x80``` is typcally left empty. ```0x80``` is where we begin our opperations. Memory does not pack values. Retrieving values from storage will be stored in their own 32 byte sequence (i.e ```0x80-0xa0```).
+
+<br> 
+
+Memory is used for the following operations: <br>
+  - Return values for external calls <br>
+  - Set function values for external calls <br>
+  - Get values from external calls <br>
+  - Revert with an error string <br>
+  - Log messages <br>
+  - Hash with ```keccak256()``` <br>
+  - Create other smart contracts <br>
+
+<br>
+
+Here are some useful Yul instructions for memory!
+
+|   Instruction   |  Explanation   |
+|  :---   | :--- |
+| mload(p)  |  Similar to ```sload()```, but we are saying load the next 32 bytes after p |
+| mstore(p, v) |  Similar to ```sstore()```, but we are saying store value v in p plus 32 bytes |
+| mstore8(p, v) |  Similar to ```mstore()```, but only for a single byte |
+| msize()  |  Returns the largest accessed memory index |
+| pop(x)  |  Discard value x |
+| return(p, s)  |  End execution, and return data from memory locations p - v |
+| revert(p, s)  |  End execution without saving state changes, and return data from memory locations p - v |
+
+<br>
+
+Let's check out some more data structures!
+<br>
+
+Structs and fixed arrays actually behave the same but since we already looked at fixed arrays in the storage section, we are going to look at structs here. Look at the following struct.
+
+```
+struct Var10 {
+    uint256 subVar1;
+    uint256 subVar2;
+}
+```
+
+Nothing unordinary about this, just a simple struct. Now let’s look at some code!
+
+```
+function getStructValues() external pure returns(uint256, uint256) {
+ 
+    // initialize struct
+    Var10 memory s;
+    s.subVar1 = 32;
+    s.subVar2 = 64;
+ 
+    assembly {
+        return( 0x80, 0xb0 )
+    }
+ 
+}
+ 
+```
+
+Here we are setting ```s.subVar1``` to memory location ```0x80``` - ```0xa0``` and  ```s.subVar2``` to memory location ```0xa0``` - ```0xb0```. That is why we are returning ```0x80``` - ```0xb0```. Here is a table of the memory layout right before the end of the transaction.
+
+
+|   Memory Location   |  Value Stored  |
+|  :---   | :--- |
+| ```0x00``` | Scratch Space (Empty) |
+| ```0x20``` |  Scratch Space (Empty) |
+| ```0x40``` |  ```0xc0``` (Free Memory Pointer) |
+| ```0x60``` |  Empty |
+| ```0x80```  |  s.subVar1: ```0x20``` (32 in decimal) |
+| ```0xa0```  |  s.subVar1: ```0x40``` (64 in decimal)  |   
+| ```0xb0```  |  Empty |  
+| ```0xc0```  |  New Free Memory Pointer. This is what ```msize()``` would return. (Empty)  | 
+
+Things to take away from this: <br>
+  - ```0x00``` - ```0x40``` are empty for scratch space <br>
+  - ```0x40``` gives us the free memory pointer <br>
+  - Solidity leaves a gap for ```0x60``` <br>
+  - ```0x80``` and ```0xa0``` are used for storing the values of the struct <br>
+  - ```0xc0``` is the new free memory pointer. <br>
+
+<br>
 
 
 
