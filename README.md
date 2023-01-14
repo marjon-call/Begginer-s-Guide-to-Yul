@@ -55,6 +55,44 @@ function addOneAnTwo() external pure returns(uint256) {
 ```
 <br>
 
+## For Loops & If Statements
+To learn about both let's write a function that counts how many numbers are even in a series.
+
+```
+function howManyEvens(uint256 startNum, uint256 endNum) external pure returns(uint256) {
+ 
+    // the value we will return
+    uint256 ans;
+ 
+    assembly {
+ 
+        // syntax for for loop
+        for { let i := startNum } lt( i, add(endNum, 1)  ) { i := add(i,1) }
+        {
+            // if i == 0 skip this iteration
+            if iszero(i) {
+                continue
+            }
+ 
+            // checks if i % 2 == 0
+            // we could of used iszero, but I wanted to show you eq()
+            if  eq( mod( i, 2 ), 0 ) {
+                ans := add(ans, 1)
+            }
+ 
+        }
+ 
+    }
+ 
+ 
+    return ans;
+ 
+}
+```
+
+The syntax for ``if`` statements is very similar to solidity, however, we do not need to wrap the condition in parentheses. For the ```for``` loop, notice we are using brackets when declaring ```i``` and incrementing ```i```, but not when we evaluate the condition. Additionally, we used a ```continue``` to skip an iteration of the loop. We can also use ```break``` statements in Yul, as well.
+
+
 
 ## Storage
 Before we can dive deeper into how Yul works, we need a good understanding of how storage works in smart contracts. Storage is composed of a series of slots. There are 2^256 slots for a smart contract. When declaring variables, we start with slot 0 and increment from there. Each slot is 256 bits long (32 bytes), that’s where ```uint256``` and ```bytes32``` get their names from. All variables are converted to hexadecimal. If a variable, such as a ```uint128```, is used we do not take an entire slot to store that variable. Instead it is padded with 0’s on the left side. Let’s look at an example to get a better understanding. <br>
