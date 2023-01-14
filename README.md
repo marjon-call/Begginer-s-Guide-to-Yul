@@ -620,14 +620,14 @@ function getStructValues() external pure returns(uint256, uint256) {
     s.subVar2 = 64;
  
     assembly {
-        return( 0x80, 0xb0 )
+        return( 0x80, 0xc0 )
     }
  
 }
  
 ```
 
-Here we are setting ```s.subVar1``` to memory location ```0x80``` - ```0xa0``` and  ```s.subVar2``` to memory location ```0xa0``` - ```0xb0```. That is why we are returning ```0x80``` - ```0xb0```. Here is a table of the memory layout right before the end of the transaction.
+Here we are setting ```s.subVar1``` to memory location ```0x80``` - ```0xa0``` and  ```s.subVar2``` to memory location ```0xa0``` - ```0xc0```. That is why we are returning ```0x80``` - ```0xc0```. Here is a table of the memory layout right before the end of the transaction.
 
 
 |   Memory Location   |  Value Stored  |
@@ -638,7 +638,6 @@ Here we are setting ```s.subVar1``` to memory location ```0x80``` - ```0xa0``` a
 | ```0x60``` |  Empty |
 | ```0x80```  |  s.subVar1: ```0x20``` (32 in decimal) |
 | ```0xa0```  |  s.subVar1: ```0x40``` (64 in decimal)  |   
-| ```0xb0```  |  Empty |  
 | ```0xc0```  |  New Free Memory Pointer. This is what ```msize()``` would return. (Empty)  | 
 
 Things to take away from this: <br>
@@ -649,6 +648,73 @@ Things to take away from this: <br>
   - ```0xc0``` is the new free memory pointer. <br>
 
 <br>
+
+In this last part of the memory section I want to show you how dynamic arrays work in memory. We are going to pass ```[0, 1, 2, 3]``` as the parameter ```arr``` for this example. As an added bonus for this example we are going to add an extra element to the array. Be careful doing this in production as you may overwrite a different memory variable. Here is the code!
+
+```
+function getDynamicArray(uint256[] memory arr) external view returns (uint256[] memory) {
+ 
+    assembly {
+ 
+        // where array is stored in memory (0x80)
+        let location := arr
+ 
+        // length of array is stored at arr (4)
+        let length := mload(arr)
+ 
+        // gets next available memory location
+        let nextMemoryLocation := add( add( location, 0x20 ), mul( length, 0x20 ) )
+ 
+        // stores new value to memory
+        mstore(nextMemoryLocation, 4)
+ 
+        // increment length by 1
+        length := add( length, 1 )
+ 
+        // store new length value
+        mstore(location, add( length, 1 ) )
+ 
+        // update free memory pointer
+        mstore(0x40, 0x140)
+ 
+        return ( add( location, 0x20 ) , mul( length, 0x20 ) )
+ 
+    }
+ 
+}
+ 
+
+```
+
+What we are doing here is getting where the array is stored in memory. Then, we get the length of the array, which is stored in the first memory location of the array. To see the next available location we are adding 32 bytes to the location (skip the length of the array) , and multiplying the length of the array by 32 bytes. This advances us to the next memory location after our array. Here, we will store our new value (4). Next, we update the length of the array by one. After that, we have to update the free memory pointer. Finally, we return the array.
+
+<br> 
+Let’s look at the memory layout once again. 
+
+|   Memory Location   |  Value Stored  |
+|  :---   | :--- |
+| ```0x00``` | Scratch Space (Empty) |
+| ```0x20``` |  Scratch Space (Empty) |
+| ```0x40``` |  ```0x140``` (Free Memory Pointer) |
+| ```0x60``` |  Empty |
+| ```0x80```  | New length of the array (6) |
+| ```0xa0```  | arr[0] (0)  |    
+| ```0xc0```  |  arr[1] (1) | 
+| ```0xe0```  |  arr[2] (2) | 
+| ```0x100```  |  arr[3] (3) | 
+| ```0x120```  |  arr[4] (4) | 
+| ```0x140```  |  Free Memory Pointer (Empty) | 
+
+<br>
+
+That concludes the section on memory!
+
+
+## Contract Calls
+
+In the final section of this article we will lok at how contract calls work in Yul.
+
+To be continued.
 
 
 
