@@ -766,7 +766,7 @@ Notice how ```var1``` &  ```var2``` have the same layout as contract ```CallMe``
 
 <br>
 
-We are now ready to make our first contract call. Let’s start with something simple, ```staticcall()``. Here is our function.
+We are now ready to make our first contract call. Let’s start with something simple, ```staticcall()```. Here is our function.
 
 ```
 function getVars(address _callMe) external view returns(uint256, uint256) {
